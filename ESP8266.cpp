@@ -831,9 +831,10 @@ void ESP8266::parseMACAddress(byte* mac, unsigned int timeout)
 
 ESP8266CommandStatus ESP8266::readStatus(unsigned int timeout)
 {
-    const char* statuses[] = {"OK\r\n", "no change\r\n", "ERROR\r\n", "link is not\r\n", "too long\r\n", "FAIL\r\n", "ALREAY CONNECT\r\n"};
+    const char* statuses[] = {"OK\r\n", "no change\r\n", "ERROR\r\n", "link is not\r\n", "too long\r\n",
+    		"FAIL\r\n", "ALREAY CONNECT\r\n", "busy s...\r\n", "busy p...\r\n"};
 
-    return (ESP8266CommandStatus)findStrings(statuses, 7, false, timeout);
+    return (ESP8266CommandStatus)findStrings(statuses, 9, false, timeout);
 }
 
 bool ESP8266::find(const __FlashStringHelper* target)
