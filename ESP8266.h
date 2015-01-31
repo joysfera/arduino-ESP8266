@@ -7,7 +7,8 @@
 //#define ESP8266_DEBUG
 
 #define ESP8266_MAX_CONNECTIONS 5
-#define ESP8266_SINGLE_CLIENT 5
+#define ESP8266_SINGLE_CLIENT 	5
+#define ESP8266_IPD_BUFFER_SIZE 256
 
 enum ESP8266WifiMode {
     ESP8266_WIFI_STATION = 1,
@@ -67,6 +68,13 @@ struct ESP8266Station {
 };
 
 //TODO: ESP8266AccessPoint struct
+
+struct ESP8266IPDBuffer {
+	unsigned int count;
+	unsigned int matched;
+	byte data[ESP8266_IPD_BUFFER_SIZE];
+
+};
 
 class ESP8266 : public Stream
 {
@@ -298,6 +306,8 @@ protected:
 
     unsigned int _id;
 
+    ESP8266IPDBuffer _ipd;
+
     // Clear the incomming data
     void clear();
 
@@ -317,6 +327,14 @@ protected:
     // Connect
     void pre_connect(unsigned int id, ESP8266Protocol protocol);
     ESP8266CommandStatus post_connect(unsigned int port);
+
+    // Read serial data
+    virtual int serialRead(bool willIpd = false);
+
+    // Read the mixed ip data
+    void serialReadData();
+
+    int timedReadData(unsigned int timeout = 0);
 
     // Read the underlying serial, waiting for timeout milliseconds. Returns the read char or -1 if timeout
     int timedRead(unsigned int timeout);
