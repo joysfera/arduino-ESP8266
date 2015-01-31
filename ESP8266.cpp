@@ -723,7 +723,7 @@ void ESP8266::serialReadData() {
 	}
 
 	if (len > 0) {
-		_available = len;
+		_available = _ipd.count = len;
 		while (len > 0 && (c = timedRead(20)) >= 0) {
 			_ipd.data[_ipd.count - len] = c;
 			len--;
@@ -738,8 +738,9 @@ void ESP8266::serialReadData() {
 
 int ESP8266::timedReadData(unsigned int timeout) {
 	int c;
+	_available--;
 	if (_ipd.count > 0) {
-		c = _ipd.data[_ipd.count - _available--];
+		c = _ipd.data[_ipd.count - _available + 1];
 		if (_available <= 0) {
 			memset(&_ipd, 0, sizeof(_ipd)); // Reset ipd buffer
 		}
