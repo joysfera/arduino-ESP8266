@@ -740,7 +740,7 @@ int ESP8266::timedReadData(unsigned int timeout) {
 	int c;
 	_available--;
 	if (_ipd.count > 0) {
-		c = _ipd.data[_ipd.count - _available + 1];
+		c = _ipd.data[_ipd.count - _available - 1];
 		if (_available <= 0) {
 			memset(&_ipd, 0, sizeof(_ipd)); // Reset ipd buffer
 		}
