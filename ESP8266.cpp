@@ -47,6 +47,7 @@ ESP8266CommandStatus ESP8266::deepSleep(unsigned long time)
     return readStatus(20);
 }
 
+// TODO remove, it's not working in AT v0.30 (use setUART instead)
 void ESP8266::setBaudrate(unsigned long baudrate)
 {
     clear();
@@ -636,7 +637,10 @@ bool ESP8266::initialize()
     unsigned long startMillis = millis();
 
     while (millis() - startMillis < 3000) {
-        if (test() == ESP8266_COMMAND_OK && setEcho(false) == ESP8266_COMMAND_OK && setUnvarnishedMode(false) == ESP8266_COMMAND_OK)
+        if (test() == ESP8266_COMMAND_OK
+            && setUART() == ESP8266_COMMAND_OK
+            && setEcho(false) == ESP8266_COMMAND_OK
+            && setUnvarnishedMode(false) == ESP8266_COMMAND_OK)
             return true;
 
         delay(100);
@@ -650,6 +654,15 @@ ESP8266CommandStatus ESP8266::setEcho(bool enable)
     clear();
     _serial->print(F("ATE"));
     _serial->println((int)enable);
+
+    return readStatus(20);
+}
+
+ESP8266CommandStatus ESP8266::setUART()
+{
+    clear();
+    _serial->print(F("AT+UART_CUR=115200,8,1,0,"));
+    _serial->println(_rtscts ? F("3") : F("0"));
 
     return readStatus(20);
 }

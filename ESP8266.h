@@ -126,6 +126,9 @@ public:
     // Set baudrate to the given value
     void setBaudrate(unsigned long baudrate);
 
+    // Set RTS/CTS hardware handshaking
+    void setRtsCts(bool enable) { _rtscts = enable; }
+
     /****************************************/
     /******        WiFi commands       ******/
     /****************************************/
@@ -331,6 +334,8 @@ protected:
 
     unsigned int _id;
 
+    bool _rtscts;
+
     ESP8266IPDBuffer _ipd;
 
     // Clear the incomming data
@@ -341,6 +346,9 @@ protected:
 
     // Set the echo
     ESP8266CommandStatus setEcho(bool enable);
+
+    // Set the UART configuration
+    ESP8266CommandStatus setUART();
 
     // Set transmission mode
     ESP8266CommandStatus setUnvarnishedMode(bool enable);
