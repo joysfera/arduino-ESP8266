@@ -518,7 +518,7 @@ int ESP8266::available()
     // incoming sequence is +IPD,id,length:data or +IPD,length:data
     // non-blocking search of '+'
     do {
-        c = _serial->read();
+        c = serialRead();
 
         if (c == -1)
             return _available = 0;
@@ -561,11 +561,7 @@ unsigned int ESP8266::getId()
 int ESP8266::read()
 {
     if (available() > 0) {
-        _available--;
-
-        while (!_serial->available()) {}
-
-        return _serial->read();
+        return timedReadData();
     }
 
     return -1;
@@ -583,7 +579,7 @@ int ESP8266::read(uint8_t* buffer, size_t size)
         size_t count = 0;
 
         while (count < readable) {
-            int c = timedRead(_timeout);
+            int c = timedReadData(_timeout);
 
             if (c == -1)
                 break;
@@ -592,7 +588,6 @@ int ESP8266::read(uint8_t* buffer, size_t size)
             count++;
         }
 
-        _available -= count;
         return count;
     }
 
@@ -629,7 +624,7 @@ size_t ESP8266::write(uint8_t b)
 /****************************************/
 void ESP8266::clear()
 {
-    while (_serial->read() != -1) {}
+    while (serialRead() != -1) {}
 }
 
 bool ESP8266::initialize()
@@ -680,13 +675,114 @@ ESP8266CommandStatus ESP8266::configureServer(int mode, unsigned int port)
     return readStatus(20);
 }
 
+
+
+int ESP8266::serialRead(bool willIpd) {
+	int c = _serial->read();
+	if (!willIpd || c < 0) {
+		return c;
+	}
+
+	String IPD_MARK = F("+IPD,");
+
+	if (c == IPD_MARK[_ipd.matched]) {
+		if (IPD_MARK.length() == ++_ipd.matched) {
+			_ipd.matched = 0;
+			serialReadData();
+			return -1;
+		}
+	} else {
+		_ipd.matched = 0;
+	}
+	return c;
+
+}
+
+void ESP8266::serialReadData() {
+	int tmp, c, len;
+
+	// read first int, id or length
+	tmp = parseInt(20);
+
+	// read next char, ',' or ':'
+	c = timedRead(20);
+
+	if (c == -1) {
+		len = -1;
+	} else if (c == ',') {
+		_id = tmp;
+		len = parseInt(20);
+		// skip ':'
+		if (timedRead(20) == -1)
+			len = -1;
+	} else if (c == ':') {
+		_id = ESP8266_SINGLE_CLIENT;
+		len = tmp;
+	} else {
+		len = -2;
+	}
+
+	if (len > 0) {
+		_available = _ipd.count = len;
+		while (len > 0 && (c = timedRead(20)) >= 0) {
+			_ipd.data[_ipd.count - len] = c;
+			len--;
+		}
+		if (len > 0) {
+			memset(&_ipd, 0, sizeof(_ipd));
+		}
+
+	}
+	readStatus(20); // Swallow the tailing "OK"
+}
+
+int ESP8266::timedReadData(unsigned int timeout) {
+	int c;
+	_available--;
+	if (_ipd.count > 0) {
+		c = _ipd.data[_ipd.count - _available - 1];
+		if (_available <= 0) {
+			memset(&_ipd, 0, sizeof(_ipd)); // Reset ipd buffer
+		}
+		return c;
+	}
+
+	while (!timeout && !_serial->available()) {}
+
+	if (!timeout) {
+		return serialRead();
+	}
+
+	unsigned long startMillis = millis();
+
+	do {
+		c = serialRead();
+
+		// return the byte if valid
+		if (c >= 0) {
+#ifdef ESP8266_DEBUG
+
+			if (millis() - startMillis > 20) {
+				Serial.print(F("==> Read Data: "));
+				Serial.print(millis() - startMillis);
+				Serial.println(F("ms"));
+			}
+
+#endif
+			return c;
+		}
+	} while (millis() - startMillis < timeout);
+
+	return -1;
+}
+
 int ESP8266::timedRead(unsigned int timeout)
 {
     unsigned long startMillis = millis();
     int c;
 
     do {
-        c = _serial->read();
+        c = serialRead(true);
 
         // return the byte if valid
         if (c >= 0) {
@@ -708,8 +804,6 @@ int ESP8266::timedRead(unsigned int timeout)
 
 void ESP8266::pre_connect(unsigned int id, ESP8266Protocol protocol)
 {
-    int c;
-
     clear();
     _serial->print(F("AT+CIPSTART="));
 
@@ -831,9 +925,10 @@ void ESP8266::parseMACAddress(byte* mac, unsigned int timeout)
 
 ESP8266CommandStatus ESP8266::readStatus(unsigned int timeout)
 {
-    const char* statuses[] = {"OK\r\n", "no change\r\n", "ERROR\r\n", "link is not\r\n", "too long\r\n", "FAIL\r\n", "ALREAY CONNECT\r\n"};
+    const char* statuses[] = {"OK\r\n", "no change\r\n", "ERROR\r\n", "link is not\r\n", "too long\r\n",
+    		"FAIL\r\n", "ALREAY CONNECT\r\n", "busy s...\r\n", "busy p...\r\n"};
 
-    return (ESP8266CommandStatus)findStrings(statuses, 7, false, timeout);
+    return (ESP8266CommandStatus)findStrings(statuses, 9, false, timeout);
 }
 
 bool ESP8266::find(const __FlashStringHelper* target)
