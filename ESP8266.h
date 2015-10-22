@@ -194,14 +194,6 @@ public:
     {
         return send(id, value, strlen(value));
     }
-    ESP8266CommandStatus send(String &value)
-    {
-        return send(ESP8266_SINGLE_CLIENT, value.c_str(), value.length());
-    }
-    ESP8266CommandStatus send(unsigned int id, const String &value)
-    {
-        return send(id, value.c_str(), value.length());
-    }
 
     // Send data generic types
     template <class T>
