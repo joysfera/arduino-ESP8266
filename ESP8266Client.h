@@ -31,6 +31,7 @@ public:
     size_t write(const uint8_t* buffer, size_t size);
 
     size_t print(const __FlashStringHelper *buffer);
+
     // Peek
     int peek();
 
@@ -45,6 +46,8 @@ public:
 
     // Connected
     operator bool();
+
+    unsigned int getId() { return _id; }
 
 protected:
     ESP8266* _esp8266;
