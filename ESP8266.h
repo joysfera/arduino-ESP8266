@@ -94,6 +94,17 @@ class ESP8266 : public Stream
 public:
     ESP8266(Stream& serial) : Stream(), _serial(&serial) {}
 
+    size_t strlen_F(const __FlashStringHelper *value)
+    {
+	size_t size = 0;
+        PGM_P p = reinterpret_cast<PGM_P>(value);
+	while(1) {
+		unsigned char c = pgm_read_byte(p + size);
+		if (c == 0) break;
+		size++;
+	}
+        return size;
+    }
     // Prepare the module
     bool begin();
 
@@ -193,6 +204,25 @@ public:
     ESP8266CommandStatus send(unsigned int id, const char *value)
     {
         return send(id, value, strlen(value));
+    }
+    ESP8266CommandStatus send(unsigned int id, const __FlashStringHelper *value)
+    {
+        int c;
+
+        clear();
+        _serial->print(F("AT+CIPSEND="));
+
+        if (id != ESP8266_SINGLE_CLIENT) {
+            _serial->print(id);
+            _serial->print(F(","));
+        }
+
+        _serial->println(strlen_F(value));
+
+        if (find(F(">"), 500)) {
+            _serial->print(value);
+        }
+        return readStatus(_timeout);
     }
 
     // Send data generic types

@@ -89,6 +89,18 @@ size_t ESP8266Client::write(const uint8_t* buffer, size_t size)
     return size;
 }
 
+size_t ESP8266Client::print(const __FlashStringHelper *buffer)
+{
+    ESP8266CommandStatus status = _esp8266->send(_id, buffer);
+
+    if (status == ESP8266_COMMAND_NO_LINK)
+        _connected = false;
+
+    if (status != ESP8266_COMMAND_SEND_OK)
+        return 0;
+
+    return _esp8266->strlen_F(buffer);
+}
 int ESP8266Client::peek()
 {
     return _esp8266->peek();
