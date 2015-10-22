@@ -683,10 +683,11 @@ int ESP8266::serialRead(bool willIpd) {
 		return c;
 	}
 
-	String IPD_MARK = F("+IPD,");
+	const char *IPD_MARK = "+IPD,";
+	byte IPD_MARK_LEN = 5;
 
 	if (c == IPD_MARK[_ipd.matched]) {
-		if (IPD_MARK.length() == ++_ipd.matched) {
+		if (IPD_MARK_LEN == ++_ipd.matched) {
 			_ipd.matched = 0;
 			serialReadData();
 			return -1;
