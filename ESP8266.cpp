@@ -884,10 +884,10 @@ byte ESP8266::parseHex(unsigned int timeout)
         if (c >= '0' && c <= '9')
             b += c - '0';
 
-        if (c >= 'a' && c <= 'z')
+        else if (c >= 'a' && c <= 'z')
             b += 10 + c - 'a';
 
-        if (c >= 'A' && c <= 'Z')
+        else if (c >= 'A' && c <= 'Z')
             b += 10 + c - 'A';
 
         if (i == 0)
