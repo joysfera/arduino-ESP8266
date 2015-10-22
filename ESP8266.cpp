@@ -765,15 +765,6 @@ int ESP8266::timedReadData(unsigned int timeout) {
 
 		// return the byte if valid
 		if (c >= 0) {
-#ifdef ESP8266_DEBUG
-
-			if (millis() - startMillis > 20) {
-				Serial.print(F("==> Read Data: "));
-				Serial.print(millis() - startMillis);
-				Serial.println(F("ms"));
-			}
-
-#endif
 			return c;
 		}
 	} while (millis() - startMillis < timeout);
@@ -791,15 +782,6 @@ int ESP8266::timedRead(unsigned int timeout)
 
         // return the byte if valid
         if (c >= 0) {
-#ifdef ESP8266_DEBUG
-
-            if (millis() - startMillis > 20) {
-                Serial.print(F("==> Read: "));
-                Serial.print(millis() - startMillis);
-                Serial.println(F("ms"));
-            }
-
-#endif
             return c;
         }
     } while(millis() - startMillis < timeout);
@@ -850,15 +832,6 @@ int ESP8266::timedPeek(unsigned int timeout)
 
         // return the byte if valid
         if (c >= 0) {
-#ifdef ESP8266_DEBUG
-
-            if (millis() - startMillis > 20) {
-                Serial.print(F("==> Peek: "));
-                Serial.print(millis() - startMillis);
-                Serial.println(F("ms"));
-            }
-
-#endif
             return c;
         }
     } while(millis() - startMillis < timeout);
@@ -956,11 +929,6 @@ bool ESP8266::find(const __FlashStringHelper* target, unsigned int timeout)
 
     // read until timeout
     while ((c = timedRead(timeout)) >= 0) {
-
-#ifdef ESP8266_DEBUG
-        Serial.write(c);
-#endif
-
         // match magic
         if(c == pgm_read_byte(p + index)) {
             if (pgm_read_byte(p + ++index) == 0)
@@ -1020,10 +988,6 @@ int ESP8266::findStrings(const char** strings, unsigned int count, bool strict, 
     // read until match or timeout
     while ((c = timedRead(timeout)) >= 0) {
         match = false;
-
-#ifdef ESP8266_DEBUG
-        Serial.write(c);
-#endif
 
         // loop over possible strings
         for (int i = 0; i < count; i++) {

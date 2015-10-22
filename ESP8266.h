@@ -4,8 +4,6 @@
 #include <Arduino.h>
 #include <IPAddress.h>
 
-//#define ESP8266_DEBUG
-
 #define ESP8266_MAX_CONNECTIONS 5
 #define ESP8266_SINGLE_CLIENT 	5
 #define ESP8266_IPD_BUFFER_SIZE 256
