@@ -323,7 +323,7 @@ ESP8266CommandStatus ESP8266::getIP(ESP8266WifiMode mode, IPAddress& ip)
     case ESP8266_WIFI_STATION:
         _serial->println(F("AT+CIPSTA?"));
 
-        if (!find(F("+CIPSTA:\""), 20))
+        if (!find(F("+CIPSTA:ip:\""), 20))
             return ESP8266_COMMAND_TIMEOUT;
 
         break;
@@ -394,6 +394,10 @@ ESP8266CommandStatus ESP8266::getConnectionStatus(ESP8266ConnectionStatus& statu
             return ESP8266_COMMAND_TIMEOUT;
 
         connection[count].port = parseInt(20);
+        if (!find(F(","), 20))
+            return ESP8266_COMMAND_TIMEOUT;
+
+	/*local port = */ (ESP8266Role)parseInt(20);
 
         if (!find(F(","), 20))
             return ESP8266_COMMAND_TIMEOUT;
@@ -613,7 +617,7 @@ void ESP8266::flush()
 
 size_t ESP8266::write(uint8_t b)
 {
-    if (send(_id, &b, 1) != ESP8266_COMMAND_OK)
+    if (send(_id, &b, 1) != ESP8266_COMMAND_SEND_OK)
         return 0;
 
     return 1;
@@ -926,10 +930,17 @@ void ESP8266::parseMACAddress(byte* mac, unsigned int timeout)
 
 ESP8266CommandStatus ESP8266::readStatus(unsigned int timeout)
 {
+#define STATUS_COUNT	11
     const char* statuses[] = {"OK\r\n", "no change\r\n", "ERROR\r\n", "link is not\r\n", "too long\r\n",
-    		"FAIL\r\n", "ALREAY CONNECT\r\n", "busy s...\r\n", "busy p...\r\n"};
+		"FAIL\r\n", "ALREADY CONNECTED\r\n", "busy s...\r\n", "busy p...\r\n", "SEND OK\r\n","SEND FAIL\r\n"
+#if 0
+                ,
+                "0,CLOSED\r\n", "1,CLOSED\r\n", "2,CLOSED\r\n", "3,CLOSED\r\n", "4,CLOSED\r\n",
+                "0,CONNECT\r\n", "1,CONNECT\r\n", "2,CONNECT\r\n", "3,CONNECT\r\n", "4,CONNECT\r\n"
+#endif
+    };
 
-    return (ESP8266CommandStatus)findStrings(statuses, 9, false, timeout);
+    return (ESP8266CommandStatus)findStrings(statuses, STATUS_COUNT, false, timeout);
 }
 
 bool ESP8266::find(const __FlashStringHelper* target)
@@ -1002,7 +1013,7 @@ size_t ESP8266::readUntil(char* buffer, size_t length, const __FlashStringHelper
 
 int ESP8266::findStrings(const char** strings, unsigned int count, bool strict, unsigned int timeout)
 {
-    unsigned int indexes[10] = {};
+    unsigned int indexes[STATUS_COUNT] = {};
     bool match;
     int c;
 

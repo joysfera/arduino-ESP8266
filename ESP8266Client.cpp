@@ -57,7 +57,7 @@ size_t ESP8266Client::write(uint8_t b)
     if (status == ESP8266_COMMAND_NO_LINK)
         _connected = false;
 
-    if (status != ESP8266_COMMAND_OK)
+    if (status != ESP8266_COMMAND_SEND_OK)
         return 0;
 
     return 1;
@@ -70,7 +70,7 @@ size_t ESP8266Client::write(const char* data)
     if (status == ESP8266_COMMAND_NO_LINK)
         _connected = false;
 
-    if (status != ESP8266_COMMAND_OK)
+    if (status != ESP8266_COMMAND_SEND_OK)
         return 0;
 
     return strlen(data);
@@ -83,7 +83,7 @@ size_t ESP8266Client::write(const uint8_t* buffer, size_t size)
     if (status == ESP8266_COMMAND_NO_LINK)
         _connected = false;
 
-    if (status != ESP8266_COMMAND_OK)
+    if (status != ESP8266_COMMAND_SEND_OK)
         return 0;
 
     return size;
