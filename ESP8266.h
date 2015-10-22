@@ -221,16 +221,11 @@ public:
 
         _serial->println((sizeof(*value)*size));
 
-        c = timedPeek(20);
-
-        if (c == -1)
-            return ESP8266_COMMAND_TIMEOUT;
-
-        if (c != '>')
-            return readStatus(_timeout);
+        if (find(F(">"), 500)) {
 
         _serial->write((byte*)value, (sizeof(*value)*size));
 
+        }
         return readStatus(_timeout);
     }
 
@@ -249,16 +244,11 @@ public:
 
         _serial->println(sizeof(value));
 
-        c = timedPeek(20);
-
-        if (c == -1)
-            return ESP8266_COMMAND_TIMEOUT;
-
-        if (c != '>')
-            return readStatus(_timeout);
+        if (find(F(">"), 500)) {
 
         _serial->write((byte*)&value, sizeof(value));
 
+        }
         return readStatus(_timeout);
     }
 
