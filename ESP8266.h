@@ -6,7 +6,9 @@
 
 #define ESP8266_MAX_CONNECTIONS 5
 #define ESP8266_SINGLE_CLIENT 	5
+#ifndef ESP8266_IPD_BUFFER_SIZE
 #define ESP8266_IPD_BUFFER_SIZE 256
+#endif
 
 enum ESP8266WifiMode {
     ESP8266_WIFI_STATION = 1,
@@ -48,10 +50,12 @@ enum ESP8266CommandStatus {
     ESP8266_COMMAND_TOO_LONG,
     ESP8266_COMMAND_FAIL,
     ESP8266_COMMAND_ALREADY_CONNECTED,
-	ESP8266_COMMAND_BUSY_SEND,
+    ESP8266_COMMAND_BUSY_SEND,
     ESP8266_COMMAND_BUSY_PROCESS,
     ESP8266_COMMAND_SEND_OK,
-    ESP8266_COMMAND_SEND_FAIL
+    ESP8266_COMMAND_SEND_FAIL,
+    ESP8266_COMMAND_WIFI_CONNECTED,
+    ESP8266_COMMAND_WIFI_GOT_IP
 #if 0
     ,
     ESP8266_STATUS_CLOSED_0,
@@ -140,6 +144,8 @@ public:
 
     // Join the access point
     ESP8266CommandStatus joinAP(char* ssid, char* password);
+
+    bool startSmart();
 
     // Get the current access point
     ESP8266CommandStatus getAP(char* ssid);

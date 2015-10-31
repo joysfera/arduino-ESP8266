@@ -638,7 +638,7 @@ bool ESP8266::initialize()
 
     while (millis() - startMillis < 3000) {
         if (test() == ESP8266_COMMAND_OK
-            && setUART() == ESP8266_COMMAND_OK
+//          && setUART() == ESP8266_COMMAND_OK
             && setEcho(false) == ESP8266_COMMAND_OK
             && setUnvarnishedMode(false) == ESP8266_COMMAND_OK)
             return true;
@@ -692,7 +692,17 @@ ESP8266CommandStatus ESP8266::configureServer(int mode, unsigned int port)
     return readStatus(20);
 }
 
+bool ESP8266::startSmart()
+{
+    clear();
+    _serial->println(F("AT+CWSTARTSMART"));
+    while(readStatus(1000) != ESP8266_COMMAND_WIFI_GOT_IP)
+        ;
 
+    clear();
+    _serial->println(F("AT+CWSTOPSMART"));
+    return readStatus(100) == ESP8266_COMMAND_OK;
+}
 
 int ESP8266::serialRead(bool willIpd) {
 	int c = _serial->read();
@@ -916,9 +926,10 @@ void ESP8266::parseMACAddress(byte* mac, unsigned int timeout)
 
 ESP8266CommandStatus ESP8266::readStatus(unsigned int timeout)
 {
-#define STATUS_COUNT	11
+#define STATUS_COUNT	13
     const char* statuses[] = {"OK\r\n", "no change\r\n", "ERROR\r\n", "link is not\r\n", "too long\r\n",
-		"FAIL\r\n", "ALREADY CONNECTED\r\n", "busy s...\r\n", "busy p...\r\n", "SEND OK\r\n","SEND FAIL\r\n"
+		"FAIL\r\n", "ALREADY CONNECTED\r\n", "busy s...\r\n", "busy p...\r\n",
+		"SEND OK\r\n","SEND FAIL\r\n","WIFI CONNECTED\r\n", "WIFI GOT IP\r\n"
 #if 0
                 ,
                 "0,CLOSED\r\n", "1,CLOSED\r\n", "2,CLOSED\r\n", "3,CLOSED\r\n", "4,CLOSED\r\n",
