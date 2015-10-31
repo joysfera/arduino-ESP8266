@@ -55,7 +55,8 @@ enum ESP8266CommandStatus {
     ESP8266_COMMAND_SEND_OK,
     ESP8266_COMMAND_SEND_FAIL,
     ESP8266_COMMAND_WIFI_CONNECTED,
-    ESP8266_COMMAND_WIFI_GOT_IP
+    ESP8266_COMMAND_WIFI_GOT_IP,
+    ESP8266_COMMAND_SMART_OK
 #if 0
     ,
     ESP8266_STATUS_CLOSED_0,
@@ -145,7 +146,10 @@ public:
     // Join the access point
     ESP8266CommandStatus joinAP(char* ssid, char* password);
 
-    bool startSmart();
+    // Smart Config
+    ESP8266CommandStatus startSmartConfig();
+    ESP8266CommandStatus processSmartConfig();
+    ESP8266CommandStatus stopSmartConfig();
 
     // Get the current access point
     ESP8266CommandStatus getAP(char* ssid);
