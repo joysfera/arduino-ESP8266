@@ -161,5 +161,7 @@ uint8_t ESP8266Client::connected()
 
 ESP8266Client::operator bool()
 {
+    if (_id == ESP8266_MAX_CONNECTIONS)
+        return false;
     return connected();
 }
