@@ -1,6 +1,7 @@
 #ifndef ESP8266Client_h
 #define ESP8266Client_h
 
+#include <Print.h>
 #include <Client.h>
 #include "ESP8266.h"
 
@@ -30,7 +31,12 @@ public:
     size_t write(const char* data);
     size_t write(const uint8_t* buffer, size_t size);
 
+    // overriding Print.print() and println() to send the string at once
     size_t print(const __FlashStringHelper *buffer);
+    size_t println(const __FlashStringHelper *buffer);
+    // pulling down the other print() overloads (with different arguments)
+    using Print::print;
+    using Print::println;
 
     // Peek
     int peek();

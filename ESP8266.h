@@ -218,7 +218,7 @@ public:
     {
         return send(id, value, strlen(value));
     }
-    ESP8266CommandStatus send(unsigned int id, const __FlashStringHelper *value)
+    ESP8266CommandStatus send(unsigned int id, const __FlashStringHelper *value, bool appendCRLF = false)
     {
         int c;
 
@@ -230,10 +230,13 @@ public:
             _serial->print(F(","));
         }
 
-        _serial->println(strlen_F(value));
+        _serial->println(strlen_F(value) + 2*appendCRLF);
 
         if (find(F(">"), 500)) {
-            _serial->print(value);
+            if (appendCRLF)
+                _serial->println(value);
+            else
+                _serial->print(value);
         }
         return readStatus(_timeout);
     }
