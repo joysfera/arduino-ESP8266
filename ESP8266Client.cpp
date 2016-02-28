@@ -127,12 +127,16 @@ void ESP8266Client::flush()
 
 void ESP8266Client::stop()
 {
-    _esp8266->close(_id);
+    if (_id != ESP8266_CLIENT_NOT_AVAILABLE)
+        _esp8266->close(_id);
     _connected = false;
 }
 
 uint8_t ESP8266Client::connected()
 {
+    if (_id == ESP8266_CLIENT_NOT_AVAILABLE)
+        return 0;
+
     ESP8266Connection connections[ESP8266_MAX_CONNECTIONS - 1];
     ESP8266ConnectionStatus status;
     unsigned int count;
@@ -161,7 +165,5 @@ uint8_t ESP8266Client::connected()
 
 ESP8266Client::operator bool()
 {
-    if (_id == ESP8266_MAX_CONNECTIONS)
-        return false;
-    return connected();
+    return _id != ESP8266_CLIENT_NOT_AVAILABLE;
 }

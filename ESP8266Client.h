@@ -5,6 +5,8 @@
 #include <Client.h>
 #include "ESP8266.h"
 
+#define ESP8266_CLIENT_NOT_AVAILABLE	255
+
 class ESP8266Client : public Client
 {
 public:
