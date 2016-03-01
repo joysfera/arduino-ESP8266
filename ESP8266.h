@@ -32,7 +32,8 @@ enum ESP8266ConnectionStatus {
 
 enum ESP8266Protocol {
     ESP8266_PROTOCOL_TCP = 0,
-    ESP8266_PROTOCOL_UDP
+    ESP8266_PROTOCOL_UDP,
+    ESP8266_PROTOCOL_SSL
 };
 
 enum ESP8266Role {

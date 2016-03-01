@@ -823,6 +823,12 @@ int ESP8266::timedRead(unsigned int timeout)
 void ESP8266::pre_connect(unsigned int id, ESP8266Protocol protocol)
 {
     clear();
+
+    if (protocol == ESP8266_PROTOCOL_SSL) {
+        _serial->println(F("AT+CIPSSLSIZE=4096"));
+        readStatus(20);
+    }
+
     _serial->print(F("AT+CIPSTART="));
 
     if (id != ESP8266_SINGLE_CLIENT) {
@@ -839,6 +845,10 @@ void ESP8266::pre_connect(unsigned int id, ESP8266Protocol protocol)
 
     case ESP8266_PROTOCOL_UDP:
         _serial->print(F("UDP"));
+        break;
+
+    case ESP8266_PROTOCOL_SSL:
+        _serial->print(F("SSL"));
         break;
     }
 
@@ -907,9 +917,9 @@ byte ESP8266::parseHex(unsigned int timeout)
 
 ESP8266Protocol ESP8266::parseProtocol(unsigned int timeout)
 {
-    const char* protocols[] = {"TCP", "UDP"};
+    const char* protocols[] = {"TCP", "UDP", "SSL"};
 
-    return (ESP8266Protocol)findStrings(protocols, 2, true, timeout);
+    return (ESP8266Protocol)findStrings(protocols, 3, true, timeout);
 }
 
 IPAddress ESP8266::parseIPAddress(unsigned int timeout)
